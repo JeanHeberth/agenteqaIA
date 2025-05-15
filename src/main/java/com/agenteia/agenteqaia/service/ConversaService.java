@@ -3,6 +3,8 @@ package com.agenteia.agenteqaia.service;
 
 import com.agenteia.agenteqaia.dto.ConversaRequestDTO;
 import com.agenteia.agenteqaia.dto.ConversaResponseDTO;
+import com.agenteia.agenteqaia.entity.Conversa;
+import com.agenteia.agenteqaia.repository.ConversaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,11 +13,13 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ConversaService {
 
+    private final ConversaRepository conversaRepository;
     private final String openaiApiKey = System.getenv("OPENAI_API_KEY");
 
     public ConversaResponseDTO processarPergunta(ConversaRequestDTO conversaRequestDTO) {
@@ -50,5 +54,11 @@ public class ConversaService {
         } catch (Exception e) {
             return "Erro ao consultar a OpenAI: " + e.getMessage();
         }
+    }
+
+    public List<ConversaResponseDTO> listarConversas() {
+        return conversaRepository.findAll().stream()
+                .map(conversa -> new ConversaResponseDTO(conversa.getResposta()))
+                .collect(Collectors.toList());
     }
 }
