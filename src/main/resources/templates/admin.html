@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin - Histórico de Conversas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Histórico de Conversas</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Data/Hora</th>
+        <th>Usuário</th>
+        <th>Pergunta</th>
+        <th>Resposta</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="conversa : ${conversas}">
+        <td th:text="${#temporals.format(conversa.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${conversa.usuario}"></td>
+        <td th:text="${conversa.mensagem}"></td>
+        <td th:text="${conversa.resposta}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
