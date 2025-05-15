@@ -1,4 +1,16 @@
 package com.agenteia.agenteqaia.dto;
 
-public class ConversaRequestDTO {
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class ConversaResponseDTO {
+
+    private String resposta;
 }
