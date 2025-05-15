@@ -5,6 +5,7 @@ import com.agenteia.agenteqaia.dto.ConversaResponseDTO;
 import com.agenteia.agenteqaia.entity.Conversa;
 import com.agenteia.agenteqaia.repository.ConversaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -21,7 +22,9 @@ import java.util.stream.Collectors;
 public class ConversaService {
 
     private final ConversaRepository conversaRepository;
-    private final String openaiApiKey = System.getenv("OPENAI_API_KEY");
+    @Value("${openai.api.key}")
+    private String openaiApiKey;
+
 
     public ConversaResponseDTO processarPergunta(ConversaRequestDTO conversaRequestDTO) {
         String resposta = chamarOpenAI(conversaRequestDTO.getMensagem());
