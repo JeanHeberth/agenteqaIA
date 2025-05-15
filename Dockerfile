@@ -12,7 +12,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew clean build --no-daemon
 
 # Copia o JAR gerado para o ponto de entrada
-COPY build/libs/agenteqaIA-0.0.1-SNAPSHOT.jar app.jar
+COPY build/libs/*-0.0.1-SNAPSHOT.jar app.jar
 
 # Expõe a porta usada pela aplicação
 EXPOSE 8089
