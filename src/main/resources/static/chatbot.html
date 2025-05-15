@@ -73,8 +73,6 @@
             const data = await response.json();
             typingIndicator.style.display = 'none';
             appendMessage('IA', data.resposta);
-            notifySound.play();
-            falar(data.resposta);
         } catch (error) {
             typingIndicator.style.display = 'none';
             appendMessage('Erro', 'Não foi possível enviar a mensagem.');
