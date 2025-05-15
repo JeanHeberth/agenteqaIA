@@ -1,14 +1,17 @@
-FROM eclipse-temurin:21-jdk
 
+# Etapa de build
+FROM gradle:8.6.0-jdk21 AS build
 WORKDIR /app
-
 COPY . .
+RUN gradle bootJar --no-daemon
 
-RUN chmod +x ./gradlew
+# Etapa de execução
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
 
-RUN ./gradlew clean build --no-daemon
-
-# Ajuste: NÃO copie o .jar, apenas aponte diretamente
+# Porta padrão do backend
 EXPOSE 8089
 
-ENTRYPOINT ["java", "-jar", "build/libs/agenteqaIA-0.0.1-SNAPSHOT.jar"]
+# Entrada da aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]

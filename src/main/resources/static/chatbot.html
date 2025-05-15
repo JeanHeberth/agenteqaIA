@@ -64,7 +64,7 @@
         typingIndicator.style.display = 'inline';
 
         try {
-            const response = await fetch('https://agenteqaia-backend.onrender.com/conversa/pergunta', {
+            const response = await fetch('http://localhost:8089/conversa/pergunta', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mensagem: userMsg })

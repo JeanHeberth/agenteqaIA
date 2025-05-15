@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document("conversa")
+@Document(collection = "conversa")
 public class Conversa {
 
     @Id
