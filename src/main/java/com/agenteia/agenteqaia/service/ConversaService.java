@@ -4,7 +4,11 @@ import com.agenteia.agenteqaia.dto.ConversaRequestDTO;
 import com.agenteia.agenteqaia.dto.ConversaResponseDTO;
 import com.agenteia.agenteqaia.entity.Conversa;
 import com.agenteia.agenteqaia.repository.ConversaRepository;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,9 +16,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,5 +114,40 @@ public class ConversaService {
                         conversa.getUsuario()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public String receberArquivo(MultipartFile file) {
+        try {
+            String nomeArquivo = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path destino = Paths.get("uploads/" + nomeArquivo);
+            Files.createDirectories(destino.getParent());
+            Files.write(destino, file.getBytes());
+
+            // OCR com Tess4J
+            Dotenv dotenv = Dotenv.load();
+
+            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH"));
+
+            ITesseract tesseract = new Tesseract();
+            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX"));
+            tesseract.setLanguage(dotenv.get("TESS_LANG"));
+
+            String textoExtraido = tesseract.doOCR(new File(destino.toString()));
+
+            // Enviar para OpenAI
+            String resposta = chamarOpenAI(textoExtraido);
+
+            Conversa conversa = new Conversa();
+            conversa.setId(UUID.randomUUID().toString());
+            conversa.setMensagem("Arquivo enviado: " + nomeArquivo);
+            conversa.setResposta(resposta);
+            conversa.setDataHora(LocalDateTime.now());
+            conversa.setUsuario("Visitante");
+            conversaRepository.save(conversa);
+
+            return resposta;
+        } catch (IOException | TesseractException e) {
+            return "Erro ao processar o arquivo: " + e.getMessage();
+        }
     }
 }
