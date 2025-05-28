@@ -138,3 +138,33 @@ body.dark-mode .timestamp {
     color: #aaa;
 }
 
+#upload-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.upload-label {
+    background-color: #007bff;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upload-label:hover {
+    background-color: #0056b3;
+}
+
+#file-name {
+    max-width: 140px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-style: italic;
+    color: #444;
+}
