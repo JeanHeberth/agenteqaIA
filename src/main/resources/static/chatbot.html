@@ -140,7 +140,7 @@
         typingIndicator.style.display = 'inline';
 
         try {
-            const response = await fetch('http://localhost:8089/conversa/upload', {
+            const response = await fetch('https://agenteqaia-backend.onrender.com/conversa/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -171,7 +171,6 @@
             alert("Apenas arquivos .jpg, .jpeg ou .png são aceitos via arrastar.");
         }
     }
-
     async function uploadDroppedFile(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -180,7 +179,7 @@
         typingIndicator.style.display = 'inline';
 
         try {
-            const response = await fetch('http://localhost:8089/conversa/upload', {
+            const response = await fetch('https://agenteqaia-backend.onrender.com/conversa/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -193,7 +192,6 @@
             appendMessage('Erro', 'Falha ao enviar o arquivo.');
         }
     }
-
     const uploadContainer = document.getElementById('upload-container');
     uploadContainer.addEventListener('dragover', () => uploadContainer.classList.add('dragover'));
     uploadContainer.addEventListener('dragleave', () => uploadContainer.classList.remove('dragover'));
