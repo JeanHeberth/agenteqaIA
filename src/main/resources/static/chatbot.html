@@ -25,10 +25,20 @@
             <button onclick="sendMessage()">Enviar</button>
         </div>
     </div>
+
+    <div id="upload-container">
+        <label for="file-input" class="upload-label">📎 Anexar Arquivo</label>
+        <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.pdf" hidden/>
+        <span id="file-name">Nenhum arquivo</span>
+        <button onclick="uploadFile()">📤 Enviar</button>
+    </div>
+
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<audio id="notify-sound" src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" preload="auto"></audio>
+<audio id="notify-sound" src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3"
+       preload="auto"></audio>
 
 <script>
     const toggleButton = document.getElementById('chat-toggle');
@@ -48,7 +58,7 @@
         document.body.classList.toggle('dark-mode');
     };
 
-    messageInput.addEventListener('keydown', function(event) {
+    messageInput.addEventListener('keydown', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             sendMessage();
@@ -66,8 +76,8 @@
         try {
             const response = await fetch('https://agenteqaia-backend.onrender.com/conversa/pergunta', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mensagem: userMsg })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mensagem: userMsg})
             });
 
             const data = await response.json();
@@ -81,12 +91,26 @@
 
     function appendMessage(sender, text) {
         const div = document.createElement('div');
-        const content = marked.parse(text);
-        const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = `<strong>${sender}:</strong>${content}<div class="timestamp">${hora}</div>`;
+        const hora = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+        // Aplica markdown e depois substitui links por imagem/pdf/link
+        let parsedContent = marked.parse(text);
+        const fileUrlRegex = /(https?:\/\/[^\s"]+?\.(jpg|jpeg|png|pdf))/g;
+
+        parsedContent = parsedContent.replace(fileUrlRegex, (url) => {
+            if (url.match(/\.(jpg|jpeg|png)$/)) {
+                return `<br><img src="${url}" alt="imagem" style="max-width: 180px; border-radius: 5px; margin-top: 5px;" />`;
+            } else if (url.match(/\.pdf$/)) {
+                return `<br><a href="${url}" target="_blank">📄 Abrir PDF</a>`;
+            }
+            return `<a href="${url}" target="_blank">${url}</a>`;
+        });
+
+        div.innerHTML = `<strong>${sender}:</strong> ${parsedContent}<div class="timestamp">${hora}</div>`;
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
 
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'pt-BR';
@@ -97,15 +121,58 @@
         recognition.start();
     }
 
-    recognition.onresult = function(event) {
+    recognition.onresult = function (event) {
         const texto = event.results[0][0].transcript;
         messageInput.value = texto;
         sendMessage();
     };
 
-    recognition.onerror = function(event) {
+    recognition.onerror = function (event) {
         console.error('Erro no reconhecimento de voz:', event.error);
     };
+
+    /***
+     ***
+     * UPLOAD DE ARQUIVOS
+     ***
+     ***/
+    async function uploadFile() {
+        const input = document.getElementById('file-input');
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file); // nome deve ser exatamente 'file'
+
+        appendMessage('Você', `📎 Enviou: ${file.name}`);
+        typingIndicator.style.display = 'inline';
+
+        try {
+            const response = await fetch('http://localhost:8089/conversa/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.text();
+            typingIndicator.style.display = 'none';
+            appendMessage('IA', data);
+        } catch (error) {
+            typingIndicator.style.display = 'none';
+            appendMessage('Erro', 'Falha ao enviar o arquivo.');
+        }
+
+        input.value = ''; // limpa input
+        document.getElementById('file-name').textContent = 'Nenhum arquivo';
+    }
+
+
+
+    document.getElementById('file-input').addEventListener('change', function () {
+        const fileNameSpan = document.getElementById('file-name');
+        fileNameSpan.textContent = this.files[0]?.name || 'Nenhum arquivo';
+    });
+
+
 </script>
 
 </body>
