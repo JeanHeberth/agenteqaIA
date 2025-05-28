@@ -31,8 +31,6 @@ public class ConversaController {
       return ResponseEntity.ok(conversaService.receberArquivo(arquivo));
     }
 
-
-
     @GetMapping("/resposta")
    public List<ConversaResponseDTO> obterRespostas() {
         return conversaService.listarConversas();
