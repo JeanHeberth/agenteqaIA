@@ -26,13 +26,12 @@
         </div>
     </div>
 
-    <div id="upload-container">
+    <div id="upload-container" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
         <label for="file-input" class="upload-label">📎 Anexar Arquivo</label>
         <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.pdf" hidden/>
         <span id="file-name">Nenhum arquivo</span>
         <button onclick="uploadFile()">📤 Enviar</button>
     </div>
-
 
 </div>
 
@@ -93,7 +92,6 @@
         const div = document.createElement('div');
         const hora = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 
-        // Aplica markdown e depois substitui links por imagem/pdf/link
         let parsedContent = marked.parse(text);
         const fileUrlRegex = /(https?:\/\/[^\s"]+?\.(jpg|jpeg|png|pdf))/g;
 
@@ -110,7 +108,6 @@
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
 
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'pt-BR';
@@ -131,18 +128,13 @@
         console.error('Erro no reconhecimento de voz:', event.error);
     };
 
-    /***
-     ***
-     * UPLOAD DE ARQUIVOS
-     ***
-     ***/
     async function uploadFile() {
         const input = document.getElementById('file-input');
         const file = input.files[0];
         if (!file) return;
 
         const formData = new FormData();
-        formData.append('file', file); // nome deve ser exatamente 'file'
+        formData.append('file', file);
 
         appendMessage('Você', `📎 Enviou: ${file.name}`);
         typingIndicator.style.display = 'inline';
@@ -161,18 +153,51 @@
             appendMessage('Erro', 'Falha ao enviar o arquivo.');
         }
 
-        input.value = ''; // limpa input
+        input.value = '';
         document.getElementById('file-name').textContent = 'Nenhum arquivo';
     }
-
-
 
     document.getElementById('file-input').addEventListener('change', function () {
         const fileNameSpan = document.getElementById('file-name');
         fileNameSpan.textContent = this.files[0]?.name || 'Nenhum arquivo';
     });
 
+    function handleDrop(event) {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file && file.type.match(/^image\/(jpeg|png)$/)) {
+            uploadDroppedFile(file);
+        } else {
+            alert("Apenas arquivos .jpg, .jpeg ou .png são aceitos via arrastar.");
+        }
+    }
 
+    async function uploadDroppedFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        appendMessage('Você', `📎 Enviou: ${file.name}`);
+        typingIndicator.style.display = 'inline';
+
+        try {
+            const response = await fetch('http://localhost:8089/conversa/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.text();
+            typingIndicator.style.display = 'none';
+            appendMessage('IA', data);
+        } catch (error) {
+            typingIndicator.style.display = 'none';
+            appendMessage('Erro', 'Falha ao enviar o arquivo.');
+        }
+    }
+
+    const uploadContainer = document.getElementById('upload-container');
+    uploadContainer.addEventListener('dragover', () => uploadContainer.classList.add('dragover'));
+    uploadContainer.addEventListener('dragleave', () => uploadContainer.classList.remove('dragover'));
+    uploadContainer.addEventListener('drop', () => uploadContainer.classList.remove('dragover'));
 </script>
 
 </body>
