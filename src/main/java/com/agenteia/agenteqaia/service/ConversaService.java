@@ -119,21 +119,20 @@ public class ConversaService {
     public String receberArquivo(MultipartFile file) {
         try {
             String nomeArquivo = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path destino = Files.createTempFile("ocr_", "_" + file.getOriginalFilename());
+            Path destino = Paths.get("/tmp/" + nomeArquivo); // caminho para o arquivo na pasta tmp
             Files.write(destino, file.getBytes());
 
             // OCR com Tess4J
-            Dotenv dotenv = Dotenv.load();
+            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load(); // para não falhar no Render
 
-            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH"));
+            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH", "/usr/lib"));
 
             ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX"));
-            tesseract.setLanguage(dotenv.get("TESS_LANG"));
+            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX", "/usr/share/tessdata")); // default do docker
+            tesseract.setLanguage(dotenv.get("TESS_LANG", "por"));
 
-            String textoExtraido = tesseract.doOCR(new File(destino.toString()));
+            String textoExtraido = tesseract.doOCR(destino.toFile());
 
-            // Enviar para OpenAI
             String resposta = chamarOpenAI(textoExtraido);
 
             Conversa conversa = new Conversa();
@@ -142,11 +141,13 @@ public class ConversaService {
             conversa.setResposta(resposta);
             conversa.setDataHora(LocalDateTime.now());
             conversa.setUsuario("Visitante");
-            conversaRepository.save(conversa);
 
+            conversaRepository.save(conversa);
             return resposta;
+
         } catch (IOException | TesseractException e) {
             return "Erro ao processar o arquivo: " + e.getMessage();
         }
     }
+
 }
