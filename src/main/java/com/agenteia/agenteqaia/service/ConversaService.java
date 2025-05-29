@@ -6,6 +6,7 @@ import com.agenteia.agenteqaia.entity.Conversa;
 import com.agenteia.agenteqaia.repository.ConversaRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ConversaService {
@@ -118,21 +120,28 @@ public class ConversaService {
 
     public String receberArquivo(MultipartFile file) {
         try {
+            log.info("📎 Iniciando upload do arquivo: {}", file.getOriginalFilename());
+
             String nomeArquivo = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path destino = Paths.get("/tmp/" + nomeArquivo); // caminho para o arquivo na pasta tmp
+            Path destino = Paths.get("uploads/" + nomeArquivo);
+            Files.createDirectories(destino.getParent());
             Files.write(destino, file.getBytes());
 
-            // OCR com Tess4J
-            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load(); // para não falhar no Render
+            log.info("✅ Arquivo salvo em: {}", destino);
 
-            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH", "/usr/lib"));
+            // OCR com Tess4J
+            Dotenv dotenv = Dotenv.load();
+            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH"));
 
             ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX", "/usr/share/tessdata")); // default do docker
-            tesseract.setLanguage(dotenv.get("TESS_LANG", "por"));
+            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX"));
+            tesseract.setLanguage(dotenv.get("TESS_LANG"));
 
+            log.info("🔍 Iniciando OCR com idioma: {}", dotenv.get("TESS_LANG"));
             String textoExtraido = tesseract.doOCR(destino.toFile());
+            log.info("📝 Texto extraído com sucesso");
 
+            // Enviar para OpenAI
             String resposta = chamarOpenAI(textoExtraido);
 
             Conversa conversa = new Conversa();
@@ -145,9 +154,17 @@ public class ConversaService {
             conversaRepository.save(conversa);
             return resposta;
 
-        } catch (IOException | TesseractException e) {
-            return "Erro ao processar o arquivo: " + e.getMessage();
+        } catch (IOException e) {
+            log.error("❌ Erro ao salvar o arquivo: {}", e.getMessage(), e);
+            return "Erro ao salvar o arquivo: " + e.getMessage();
+        } catch (TesseractException e) {
+            log.error("❌ Erro no OCR: {}", e.getMessage(), e);
+            return "Erro ao processar OCR: " + e.getMessage();
+        } catch (Exception e) {
+            log.error("❌ Erro inesperado ao processar arquivo: {}", e.getMessage(), e);
+            return "Erro inesperado ao processar arquivo.";
         }
     }
+
 
 }
