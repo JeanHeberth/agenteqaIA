@@ -144,7 +144,6 @@ async function uploadDroppedFile(file) {
             method: 'POST',
             body: formData
         });
-
         const data = await response.text();
         typingIndicator.style.display = 'none';
         appendMessage('IA', data);
