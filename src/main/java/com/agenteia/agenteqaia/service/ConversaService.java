@@ -119,8 +119,7 @@ public class ConversaService {
     public String receberArquivo(MultipartFile file) {
         try {
             String nomeArquivo = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path destino = Paths.get("uploads/" + nomeArquivo);
-            Files.createDirectories(destino.getParent());
+            Path destino = Files.createTempFile("ocr_", "_" + file.getOriginalFilename());
             Files.write(destino, file.getBytes());
 
             // OCR com Tess4J
