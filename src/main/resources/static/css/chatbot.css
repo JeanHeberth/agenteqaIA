@@ -168,3 +168,37 @@ body.dark-mode .timestamp {
     font-style: italic;
     color: #444;
 }
+#upload-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+    padding: 5px;
+    font-size: 14px;
+}
+
+.upload-label {
+    cursor: pointer;
+    color: #1d272da8;
+    font-weight: 500;
+}
+
+#file-name {
+    font-style: italic;
+    color: #555;
+}
+
+#upload-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#upload-container button:hover {
+    background-color: #0056b3;
+}
