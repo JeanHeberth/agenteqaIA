@@ -6,6 +6,7 @@ const notifySound = document.getElementById('notify-sound');
 const typingIndicator = document.getElementById('typing-indicator');
 const themeToggle = document.getElementById('toggle-theme');
 const BASE_URL = 'https://agenteqaia-backend.onrender.com';
+const BASE_URL_LOCAL = 'http://localhost:8089';
 
 // Alternar janela do chat
 toggleButton.onclick = () => {

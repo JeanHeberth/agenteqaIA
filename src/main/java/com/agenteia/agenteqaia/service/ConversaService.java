@@ -131,13 +131,13 @@ public class ConversaService {
 
             // OCR com Tess4J
             Dotenv dotenv = Dotenv.load();
-            System.setProperty("jna.library.path", dotenv.get("JNA_LIBRARY_PATH"));
+            System.setProperty("jna.library.path", System.getenv("JNA_LIBRARY_PATH"));
 
             ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath(dotenv.get("TESSDATA_PREFIX"));
-            tesseract.setLanguage(dotenv.get("TESS_LANG"));
+            tesseract.setDatapath(System.getenv("TESSDATA_PREFIX"));
+            tesseract.setLanguage(System.getenv("TESS_LANG"));
 
-            log.info("🔍 Iniciando OCR com idioma: {}", dotenv.get("TESS_LANG"));
+            log.info("🔍 Iniciando OCR com idioma: {}", System.getenv("TESS_LANG"));
             String textoExtraido = tesseract.doOCR(destino.toFile());
             log.info("📝 Texto extraído com sucesso");
 
