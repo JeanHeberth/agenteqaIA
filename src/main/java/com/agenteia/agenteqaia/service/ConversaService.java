@@ -130,7 +130,6 @@ public class ConversaService {
             log.info("✅ Arquivo salvo em: {}", destino);
 
             // OCR com Tess4J
-            Dotenv dotenv = Dotenv.load();
             System.setProperty("jna.library.path", System.getenv("JNA_LIBRARY_PATH"));
 
             ITesseract tesseract = new Tesseract();
@@ -165,6 +164,7 @@ public class ConversaService {
             return "Erro inesperado ao processar arquivo.";
         }
     }
+
 
 
 }
