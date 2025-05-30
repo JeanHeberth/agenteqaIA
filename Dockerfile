@@ -24,5 +24,3 @@ COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8089
 ENTRYPOINT ["java", "-jar", "app.jar"]
 
-
-RUN ls -l /usr/share/tesseract-ocr/4.00/tessdata
