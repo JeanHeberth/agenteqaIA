@@ -133,10 +133,10 @@ public class ConversaService {
             System.setProperty("jna.library.path", System.getenv("JNA_LIBRARY_PATH"));
 
             ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath(System.getenv("TESSDATA_PREFIX"));
-            tesseract.setLanguage(System.getenv("TESS_LANG"));
+            tesseract.setDatapath("/usr/share/tesseract-ocr/5/tessdata");
+            tesseract.setLanguage("por");
 
-            log.info("🔍 Iniciando OCR com idioma: {}", System.getenv("TESS_LANG"));
+            log.info("🔍 Iniciando OCR com idioma: por");
             String textoExtraido = tesseract.doOCR(destino.toFile());
             log.info("📝 Texto extraído com sucesso");
 
