@@ -1,7 +1,6 @@
-# Etapa de build: compila o projeto e gera o JAR
+# Etapa de build
 FROM gradle:8.6.0-jdk21 AS build
 
-# Instala dependências do sistema, incluindo Tesseract e o idioma português
 RUN apt-get update && \
     apt-get install -y \
     tesseract-ocr \
@@ -11,29 +10,26 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Define o caminho real do tessdata
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 ENV TESS_LANG=por
 
 WORKDIR /app
 COPY . .
-
-# Gera o JAR
 RUN gradle bootJar --no-daemon
 
-# Etapa de execução: imagem menor apenas para rodar o app
+# Etapa de execução
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# Define novamente as variáveis de ambiente na imagem final
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 ENV TESS_LANG=por
 
-# Copia o JAR gerado na etapa de build
+# Copia as bibliotecas e arquivos necessários
+COPY --from=build /usr/lib/x86_64-linux-gnu/libtesseract.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Expõe a porta da aplicação
+# Porta do app
 EXPOSE 8089
 
-# Executa o JAR
-ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
+# Corrigido: adicionando jna.library.path
+ENTRYPOINT ["java", "-Djna.library.path=/usr/lib/x86_64-linux-gnu/", "-jar", "app.jar"]
