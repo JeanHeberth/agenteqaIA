@@ -10,7 +10,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 ENV TESS_LANG=por
 
 WORKDIR /app
@@ -21,11 +21,15 @@ RUN gradle bootJar --no-daemon
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# Copia o jar final
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+ENV TESS_LANG=por
+
+# Copia as bibliotecas e arquivos necessários
+COPY --from=build /usr/lib/x86_64-linux-gnu/libtesseract.so* /usr/lib/x86_64-linux-gnu/
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Expõe a porta padrão
+# Porta do app
 EXPOSE 8089
 
-# Permite que variáveis de ambiente sejam utilizadas no entrypoint
-ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
+# Corrigido: adicionando jna.library.path
+ENTRYPOINT ["java", "-Djna.library.path=/usr/lib/x86_64-linux-gnu/", "-jar", "app.jar"]
