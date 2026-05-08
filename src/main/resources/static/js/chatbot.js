@@ -5,7 +5,7 @@ const messageInput = document.getElementById('message-input');
 const notifySound = document.getElementById('notify-sound');
 const typingIndicator = document.getElementById('typing-indicator');
 const themeToggle = document.getElementById('toggle-theme');
-const BASE_URL = 'https://agenteqaia-backend.onrender.com';
+// const BASE_URL = 'https://agenteqaia-backend.onrender.com';
 const BASE_URL_LOCAL = 'http://localhost:8089';
 
 // Alternar janela do chat
@@ -34,7 +34,7 @@ async function sendMessage() {
     typingIndicator.style.display = 'inline';
 
     try {
-        const response = await fetch(`${BASE_URL}/conversa/pergunta`, {
+        const response = await fetch(`${BASE_URL_LOCAL}/conversa/pergunta`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({mensagem: userMsg})
@@ -101,7 +101,7 @@ async function uploadFile() {
     typingIndicator.style.display = 'inline';
 
     try {
-        const response = await fetch(`${BASE_URL}/conversa/upload`, {
+        const response = await fetch(`${BASE_URL_LOCAL}/conversa/upload`, {
             method: 'POST',
             body: formData
         });
@@ -141,7 +141,7 @@ async function uploadDroppedFile(file) {
     typingIndicator.style.display = 'inline';
 
     try {
-        const response = await fetch(`${BASE_URL}/conversa/upload`, {
+        const response = await fetch(`${BASE_URL_LOCAL}/conversa/upload`, {
             method: 'POST',
             body: formData
         });
