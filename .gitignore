@@ -38,3 +38,8 @@ application.properties
 
 ### VS Code ###
 .vscode/
+
+### Agents ###
+agents/
+.github/agents/
+
